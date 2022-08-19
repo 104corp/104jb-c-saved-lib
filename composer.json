@@ -1,0 +1,28 @@
+{
+    "name": "104corp/jb-c-saved-lib",
+    "description": "C-Team Saved PHP library",
+    "type": "library",
+    "license": "104 Corporation. All rights reserved.",
+    "require": {
+        "php": "^7.4"
+    },
+    "require-dev": {
+        "mockery/mockery": "^1.4",
+        "phpstan/phpstan": "^0.12.77",
+        "phpunit/phpunit": "^9.5",
+        "squizlabs/php_codesniffer": "^3.5"
+    },
+    "autoload": {
+        "psr-4": {
+            "Corp104\\Jbc\\Message\\": "src/Message"
+        }
+    },
+    "autoload-dev": {
+        "psr-4": {
+            "Tests\\": "tests/"
+        }
+    },
+    "config": {
+        "sort-packages": true
+    }
+}

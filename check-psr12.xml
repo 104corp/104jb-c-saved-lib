@@ -1,0 +1,48 @@
+<?xml version="1.0"?>
+<ruleset name="C coding standard">
+    <description>C coding standard</description>
+
+    <!-- display progress -->
+    <arg value="p"/>
+    <arg value="s"/>
+
+    <!-- use colors in output -->
+    <arg name="colors"/>
+
+    <!-- inherit rules from: -->
+    <rule ref="PSR12">
+        <exclude name="Generic.Files.LineLength"/>
+    </rule>
+    <rule ref="Generic.PHP.Syntax"/>
+    <rule ref="Generic.Arrays.DisallowLongArraySyntax"/>
+
+    <!-- Paths and file to check -->
+    <file>src</file>
+    <file>tests</file>
+
+    <!-- exclude file -->
+    <exclude-pattern>tests/_data</exclude-pattern>
+    <exclude-pattern>tests/_output</exclude-pattern>
+    <exclude-pattern>tests/_support</exclude-pattern>
+
+    <rule ref="Generic.Formatting.SpaceAfterCast">
+        <properties>
+            <property name="spacing" value="1"/>
+        </properties>
+    </rule>
+
+    <!-- Visibility must be declared on all constants if your project supports PHP 7.1 or later-->
+    <rule ref="PSR12.Properties.ConstantVisibility.NotFound">
+        <severity>4</severity>
+    </rule>
+
+    <rule ref="Generic.Files.LineLength.TooLong">
+        <exclude-pattern>src</exclude-pattern>
+        <exclude-pattern>tests</exclude-pattern>
+    </rule>
+
+    <rule ref="PSR2.Methods.MethodDeclaration.Underscore">
+        <exclude-pattern>tests</exclude-pattern>
+    </rule>
+
+</ruleset>

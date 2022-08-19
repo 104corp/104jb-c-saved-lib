@@ -1,0 +1,11 @@
+# Composer files
+/vendor
+/composer.lock
+composer.phar
+
+# .env files
+.env*
+
+# Test coverage folder and files
+.phpunit.result.cache
+build

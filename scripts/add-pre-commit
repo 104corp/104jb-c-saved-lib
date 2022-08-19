@@ -1,0 +1,6 @@
+#!/bin/bash
+
+FILES=$(git diff --name-only --diff-filter=ACMR --cached HEAD -- '*.php' );
+if [ ! -z "$FILES" ]; then
+    ./vendor/bin/phpcs --standard=check-psr12.xml $FILES
+fi

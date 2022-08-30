@@ -144,7 +144,7 @@ class SavedJobServiceTest extends TestCase
 
         $mockNsBuffetRepository = $this->createMock(NsBuffetRepository::class);
         $mockNsBuffetRepository->expects($this->once())
-            ->method('createMany')
+            ->method('insertMany')
             ->with($idNo, $validJobs)
             ->willReturn(1);
 

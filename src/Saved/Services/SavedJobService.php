@@ -81,7 +81,7 @@ class SavedJobService
             return 0;
         }
 
-        $recordCount = $this->nsBuffetRepository->createMany($idNo, $validJobs);
+        $recordCount = $this->nsBuffetRepository->insertMany($idNo, $validJobs);
         $this->cache->forget($this->getListCacheKey($idNo));
 
         return $recordCount;

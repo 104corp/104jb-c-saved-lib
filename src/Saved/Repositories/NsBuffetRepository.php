@@ -34,7 +34,7 @@ class NsBuffetRepository
      *
      * @return int
      */
-    public function createMany(int $idNo, array $jobs): int
+    public function insertMany(int $idNo, array $jobs): int
     {
         $data = [];
         foreach ($jobs as $job) {

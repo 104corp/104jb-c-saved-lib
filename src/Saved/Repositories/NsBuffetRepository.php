@@ -51,7 +51,7 @@ class NsBuffetRepository
     }
 
     /**
-     * @param  int $pid
+     * @param  int $idNo
      * @param  array $jobNos
      *
      * @return int

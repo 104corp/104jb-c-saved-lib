@@ -27,6 +27,8 @@ class InterestCompany extends Model
 
     public $timestamps = false;
 
+    public $incrementing = false;
+
     protected static function newFactory()
     {
         //

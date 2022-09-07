@@ -232,8 +232,6 @@ class SavedCompanyServiceTest extends TestCase
         $this->assertSame(2, $actual);
     }
 
-    // testBatchDeleteWithInvalidJobNosShouldReturnZero
-
     public function testBatchDeleteWithInvalidCustnosShouldReturnZero()
     {
         $idNo = 123;
@@ -375,7 +373,6 @@ class SavedCompanyServiceTest extends TestCase
         $this->assertSame(1, $actual);
     }
 
-    // testBatchUnsubscribeWithCustnosNotSubscribedShouldReturnZero
     public function testBatchUnsubscribeWithCustnosNotSubscribedShouldReturnZero()
     {
         $idNo = 123;

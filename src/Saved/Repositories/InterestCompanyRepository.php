@@ -15,6 +15,8 @@ class InterestCompanyRepository
     public const ACTION_SUBSCRIBE = 1;
 
     /**
+     * 取得儲存公司列表 by idNo & 訂閱狀態
+     *
      * @param  int $idNo
      * @param  bool $subscriptionFlag 0:全取 1:僅取已訂閱
      *
@@ -33,6 +35,8 @@ class InterestCompanyRepository
     }
 
     /**
+     * 多筆新增儲存公司
+     *
      * @param  int $idNo
      * @param  array $custNos
      *
@@ -54,6 +58,8 @@ class InterestCompanyRepository
     }
 
     /**
+     * 多筆取消儲存公司
+     *
      * @param  int $idNo
      * @param  array $custNos
      *
@@ -67,6 +73,8 @@ class InterestCompanyRepository
     }
 
     /**
+     * 更新訂閱狀態
+     *
      * @param  int $idNo
      * @param  array $custNos
      * @param  int $notify 訂閱新工作通知設定 0:未訂閱 1:訂閱

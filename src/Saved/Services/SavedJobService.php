@@ -49,7 +49,7 @@ class SavedJobService
     }
 
     /**
-     * 多筆刪除儲存工作
+     * 多筆新增儲存工作
      *
      * @param  int $idNo
      * @param  array $jobs

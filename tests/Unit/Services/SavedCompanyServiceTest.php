@@ -2,7 +2,7 @@
 
 declare(strict_types=1);
 
-namespace Tests\Unit;
+namespace Tests\Unit\Services;
 
 use Corp104\Jbc\Saved\Exceptions\ErrorCode;
 use Corp104\Jbc\Saved\Exceptions\ExceedLimitException;
@@ -30,7 +30,6 @@ class SavedCompanyServiceTest extends TestCase
             ->method('get')
             ->with($cacheKey)
             ->willReturn($expected);
-        $this->cache = $mockCache;
 
         $target = new SavedCompanyService($this->createMock(InterestCompanyRepository::class), $mockCache);
         $actual = $target->list($idNo);
@@ -55,7 +54,6 @@ class SavedCompanyServiceTest extends TestCase
             ->method('get')
             ->with($cacheKey)
             ->willReturn($expected);
-        $this->cache = $mockCache;
 
         $target = new SavedCompanyService($this->createMock(InterestCompanyRepository::class), $mockCache);
         $actual = $target->list($idNo, InterestCompanyRepository::FLAG_LIST_SUBSCRIBED);
@@ -79,7 +77,6 @@ class SavedCompanyServiceTest extends TestCase
         $mockCache->expects($this->once())
             ->method('put')
             ->with($cacheKey);
-        $this->cache = $mockCache;
 
         $mockRepository = $this->createMock(InterestCompanyRepository::class);
         $mockRepository->expects($this->once())
@@ -109,7 +106,6 @@ class SavedCompanyServiceTest extends TestCase
         $mockCache->expects($this->once())
             ->method('put')
             ->with($cacheKey);
-        $this->cache = $mockCache;
 
         $mockRepository = $this->createMock(InterestCompanyRepository::class);
         $mockRepository->expects($this->once())
@@ -271,7 +267,6 @@ class SavedCompanyServiceTest extends TestCase
             ->method('get')
             ->withConsecutive([$cacheKey], [$subscribedCacheKey])
             ->willReturnOnConsecutiveCalls($savedCustnos, []);
-        $this->cache = $mockCache;
 
         $mockRepository = $this->createMock(InterestCompanyRepository::class);
         $mockRepository->expects($this->once())
@@ -306,7 +301,6 @@ class SavedCompanyServiceTest extends TestCase
             ->method('get')
             ->withConsecutive([$cacheKey], [$subscribedCacheKey])
             ->willReturnOnConsecutiveCalls($savedCustnos, $subscribedCustnos);
-        $this->cache = $mockCache;
 
         $target = new SavedCompanyService($this->createMock(InterestCompanyRepository::class), $mockCache);
         $actual = $target->batchSubscribe($idNo, [456456]);
@@ -333,7 +327,6 @@ class SavedCompanyServiceTest extends TestCase
             ->method('get')
             ->withConsecutive([$cacheKey], [$subscribedCacheKey])
             ->willReturnOnConsecutiveCalls($savedCustnos, []);
-        $this->cache = $mockCache;
 
         $target = new SavedCompanyService($this->createMock(InterestCompanyRepository::class), $mockCache);
         $actual = $target->batchSubscribe($idNo, [321321]);
@@ -359,7 +352,6 @@ class SavedCompanyServiceTest extends TestCase
             ->method('get')
             ->with($subscribedCacheKey)
             ->willReturn($subscribedCustnos);
-        $this->cache = $mockCache;
 
         $mockRepository = $this->createMock(InterestCompanyRepository::class);
         $mockRepository->expects($this->once())
@@ -391,7 +383,6 @@ class SavedCompanyServiceTest extends TestCase
             ->method('get')
             ->with($subscribedCacheKey)
             ->willReturn($subscribedCustnos);
-        $this->cache = $mockCache;
 
         $target = new SavedCompanyService($this->createMock(InterestCompanyRepository::class), $mockCache);
         $actual = $target->batchUnsubscribe($idNo, [321321]);

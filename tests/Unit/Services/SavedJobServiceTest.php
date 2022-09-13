@@ -2,7 +2,7 @@
 
 declare(strict_types=1);
 
-namespace Tests\Unit;
+namespace Tests\Unit\Services;
 
 use Corp104\Jbc\Saved\Exceptions\ErrorCode;
 use Corp104\Jbc\Saved\Exceptions\ExceedLimitException;
@@ -30,7 +30,6 @@ class SavedJobServiceTest extends TestCase
             ->method('get')
             ->with($cacheKey)
             ->willReturn($expected);
-        $this->cache = $mockCache;
 
         $target = new SavedJobService($this->createMock(NsBuffetRepository::class), $mockCache);
         $actual = $target->list($idNo);

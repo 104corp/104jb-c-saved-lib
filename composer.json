@@ -4,7 +4,7 @@
     "type": "library",
     "license": "104 Corporation. All rights reserved.",
     "require": {
-        "php": "^7.4"
+        "php": "^7.4 || ^8.0"
     },
     "require-dev": {
         "illuminate/database": "^8",

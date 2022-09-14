@@ -1,0 +1,29 @@
+os: linux
+dist: bionic
+language: php
+php:
+  - 7.4
+  - 8.0
+
+branches:
+  only:
+    - master
+
+before_script:
+  - composer config -g github-oauth.github.com ${GITHUB_ACCESS_TOKEN}
+  - make deps
+
+script:
+  - make tests
+
+cache:
+  directories:
+    - $HOME/.composer/cache
+    - vendor
+
+notifications:
+  email: false
+  slack:
+    on_success: never
+    rooms:
+      secure: U8ThQNhWNC4PlCQDd6qU+OpS5RXaWIuIsK7di80sVHK5QFq/til+F27NlxVqihfa9lK7X/KVCsuAkJgn+4JaoKyi7XOgxl9X0y47SeERqHpG2Cuph23BqkGIVC0qr90+4FmQVJzAL9YpEhN9QCwv6qv0sDCW0Su8w069oJNWm4TAzgARqnoXj0eKLnuRy7aSbU9hSQb+VwNaOkpM8QhcUaLmhIbcUNoewT07+oQMq5ClSN92OM1DRoQygYzTiyGyCwLWr7fsyEWkbxi4eh6+Z6/+gvhCa+m35W+TLc2aLYWAE+67swAGWr0hE0GDTQCdBtVxouJ+aFRgvBZytn4TPV4LgDwSzuXZVZL9fyVZRSW9kIb4SyfLA/a3s2ioXpVKPnnzp5mSUTh+Pu9GoiQXzGVwbKoGpxSjt/3QN192R34adup2FffIiuqgUwNIDO3l78HC9gcDpWbbjFoIXmn8kwy7k+aNJ5B4Q9wCkCJ9SdjkJJoipdkMTe1im1JsBnWyAr2CFHnhQIbYxJtKNrwXIbbSqyqS7uADj2UxM+tiACXQqNB+pjSfiu2/iuynaA4ka6oko9/XiTyQzmzvBRvoA+zr1g7SmTY16Wyv3yd5HRq9ihXbIIVOsQ2n81NkZuL+8IO8fUeD8t18jSZu0HFDhE+7EGhTszJh6yYePDBCeh0=

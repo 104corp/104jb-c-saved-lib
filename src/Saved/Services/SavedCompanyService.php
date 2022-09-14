@@ -131,7 +131,8 @@ class SavedCompanyService
             return 0;
         }
 
-        $recordCount = $this->interestCompanyRepository->updateNotify($idNo, $validCustNos, InterestCompanyRepository::ACTION_SUBSCRIBE);
+        $recordCount = $this->interestCompanyRepository
+            ->updateNotify($idNo, $validCustNos, InterestCompanyRepository::ACTION_SUBSCRIBE);
         $this->cache->forget($this->getListCacheKey($idNo, InterestCompanyRepository::FLAG_LIST_SUBSCRIBED));
 
         return $recordCount;
@@ -156,7 +157,8 @@ class SavedCompanyService
             return 0;
         }
 
-        $recordCount = $this->interestCompanyRepository->updateNotify($idNo, $validCustNos, InterestCompanyRepository::ACTION_UNSUBSCRIBE);
+        $recordCount = $this->interestCompanyRepository
+            ->updateNotify($idNo, $validCustNos, InterestCompanyRepository::ACTION_UNSUBSCRIBE);
         $this->cache->forget($this->getListCacheKey($idNo, InterestCompanyRepository::FLAG_LIST_SUBSCRIBED));
 
         return $recordCount;
@@ -168,8 +170,10 @@ class SavedCompanyService
      *
      * @return string
      */
-    private function getListCacheKey(int $idNo, int $subscriptionFlag = InterestCompanyRepository::FLAG_LIST_ALL): string
-    {
+    private function getListCacheKey(
+        int $idNo,
+        int $subscriptionFlag = InterestCompanyRepository::FLAG_LIST_ALL
+    ): string {
         if ($subscriptionFlag) {
             return self::SUBSCRIBED_LIST_CACHE_KEY . $idNo;
         }

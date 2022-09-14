@@ -4,9 +4,10 @@
     "type": "library",
     "license": "104 Corporation. All rights reserved.",
     "require": {
-        "php": "^7.4"
+        "php": "^7.4 || ^8.0"
     },
     "require-dev": {
+        "illuminate/database": "^8",
         "mockery/mockery": "^1.4",
         "phpstan/phpstan": "^0.12.77",
         "phpunit/phpunit": "^9.5",
@@ -14,7 +15,7 @@
     },
     "autoload": {
         "psr-4": {
-            "Corp104\\Jbc\\Message\\": "src/Message"
+            "Corp104\\Jbc\\Saved\\": "src/Saved"
         }
     },
     "autoload-dev": {

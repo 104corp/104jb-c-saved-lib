@@ -3,10 +3,21 @@
     "description": "C-Team Saved PHP library",
     "type": "library",
     "license": "104 Corporation. All rights reserved.",
+    "repositories": {
+        "jb-c-search-lib": {
+            "type": "vcs",
+            "url": "https://github.com/104corp/104jb-c-search-lib.git"
+        },
+        "satis": {
+            "type": "composer",
+            "url": "https://104corp.github.io/104-php-combuilder"
+        }
+    },
     "require": {
         "php": "^7.4 || ^8.0"
     },
     "require-dev": {
+        "104corp/jb-c-search-lib": "dev-off-job",
         "illuminate/database": "^8",
         "mockery/mockery": "^1.4",
         "phpstan/phpstan": "^0.12.77",

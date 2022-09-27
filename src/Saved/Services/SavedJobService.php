@@ -7,22 +7,26 @@ namespace Corp104\Jbc\Saved\Services;
 use Corp104\Jbc\Saved\Exceptions\ErrorCode;
 use Corp104\Jbc\Saved\Exceptions;
 use Corp104\Jbc\Saved\Repositories\NsBuffetRepository;
+use Corp104\Jbc\Search\Job\JobSearch;
 use Illuminate\Contracts\Cache\Repository as Cache;
 
 class SavedJobService
 {
-    public const LIST_CACHE_KEY = 'saved_job_list_';
+    public const LIST_CACHE_KEY = 'saved_job_list_0927_';
     private const LIST_CACHE_TTL = 180;
     private const TOTAL_LIMIT = 200;
 
     private NsBuffetRepository $nsBuffetRepository;
+    private JobSearch $jobSearch;
     private Cache $cache;
 
     public function __construct(
         NsBuffetRepository $nsBuffetRepository,
+        JobSearch $jobSearch,
         Cache $cache
     ) {
         $this->nsBuffetRepository = $nsBuffetRepository;
+        $this->jobSearch = $jobSearch;
         $this->cache = $cache;
     }
 
@@ -40,12 +44,23 @@ class SavedJobService
             return $this->cache->get($cacheKey);
         }
 
-        $savedJobNos = $this->nsBuffetRepository->findByIdNo($idNo);
-        if (!empty($savedJobNos)) {
-            $this->cache->put($cacheKey, $savedJobNos, self::LIST_CACHE_TTL);
+        $savedJobs = $this->nsBuffetRepository->findByIdNo($idNo);
+        $savedJobNos = array_column($savedJobs, 'jobno');
+        $validJobNos = $this->validJobFilter($savedJobNos);
+        $savedList = [];
+        foreach ($savedJobs as $savedJob) {
+            if (in_array($savedJob['jobno'], $validJobNos)) {
+                $savedList[] = [
+                    'jobNo' => $savedJob['jobno'],
+                    'inputDate' => $savedJob['input_date'],
+                ];
+            }
+        }
+        if (!empty($savedList)) {
+            $this->cache->put($cacheKey, $savedList, self::LIST_CACHE_TTL);
         }
 
-        return $savedJobNos;
+        return $savedList;
     }
 
     /**
@@ -64,7 +79,7 @@ class SavedJobService
      */
     public function batchCreate(int $idNo, array $jobs): int
     {
-        $savedJobNos = $this->list($idNo);
+        $savedJobNos = array_column($this->list($idNo), 'jobNo');
 
         $total = count($savedJobNos) + count($jobs);
         if ($total > self::TOTAL_LIMIT) {
@@ -97,13 +112,7 @@ class SavedJobService
      */
     public function batchDelete(int $idNo, array $jobNos): int
     {
-        $savedJobNos = $this->list($idNo);
-        $validJobNos = array_intersect($savedJobNos, $jobNos);
-        if (count($validJobNos) === 0) {
-            return 0;
-        }
-
-        $recordCount = $this->nsBuffetRepository->deleteMany($idNo, $validJobNos);
+        $recordCount = $this->nsBuffetRepository->deleteMany($idNo, $jobNos);
         if ($recordCount > 0) {
             $this->cache->forget($this->getListCacheKey($idNo));
         }
@@ -119,5 +128,22 @@ class SavedJobService
     private function getListCacheKey(int $idNo): string
     {
         return self::LIST_CACHE_KEY . $idNo;
+    }
+
+    /**
+     * 過濾有效職缺（jobOn + jobOff）, 已刪除職缺會被過濾掉
+     *
+     * @param array $jobNos
+     *
+     * @return array
+     */
+    private function validJobFilter(array $jobNos): array
+    {
+        $onJobs = $this->jobSearch->onJobs($jobNos, ['RETURNID'])->get();
+        $onJobNos = array_column($onJobs, 'RETURNID');
+        $offJobs = $this->jobSearch->offJobs($jobNos, ['returnid'])->get();
+        $offJobNos = array_column($offJobs, 'returnid');
+
+        return $onJobNos + $offJobNos;
     }
 }

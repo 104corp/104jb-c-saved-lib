@@ -18,7 +18,8 @@ class NsBuffetRepository
     {
         return NsBuffet::where('id_no', $idNo)
             ->orderByDesc('input_date')
-            ->pluck('jobno')
+            ->select(['jobno', 'input_date'])
+            ->get()
             ->toArray();
     }
 

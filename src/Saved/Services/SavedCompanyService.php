@@ -42,12 +42,20 @@ class SavedCompanyService
             return $this->cache->get($cacheKey);
         }
 
-        $savedCustNos = $this->interestCompanyRepository->findByIdNo($idNo, $subscriptionFlag);
-        if (!empty($savedCustNos)) {
-            $this->cache->put($cacheKey, $savedCustNos, self::LIST_CACHE_TTL);
+        $savedCusts = $this->interestCompanyRepository->findByIdNo($idNo, $subscriptionFlag);
+        $custList = [];
+        foreach ($savedCusts as $savedCust) {
+            $custList[] = [
+                'custNo' => $savedCust['custno'],
+                'inputDate' => $savedCust['input_date'],
+                'notify' => $savedCust['notify'],
+            ];
+        }
+        if (!empty($custList)) {
+            $this->cache->put($cacheKey, $custList, self::LIST_CACHE_TTL);
         }
 
-        return $savedCustNos;
+        return $custList;
     }
 
     /**
@@ -60,7 +68,7 @@ class SavedCompanyService
      */
     public function batchCreate(int $idNo, array $custNos): int
     {
-        $savedCustNos = $this->list($idNo);
+        $savedCustNos = array_column($this->list($idNo), 'custNo');
 
         $total = count($savedCustNos) + count($custNos);
         if ($total > self::TOTAL_LIMIT) {
@@ -93,7 +101,7 @@ class SavedCompanyService
      */
     public function batchDelete(int $idNo, array $custNos): int
     {
-        $savedCustNos = $this->list($idNo);
+        $savedCustNos = array_column($this->list($idNo), 'custNo');
         $validCustNos = array_intersect($savedCustNos, $custNos);
         if (count($validCustNos) === 0) {
             return 0;
@@ -118,8 +126,9 @@ class SavedCompanyService
      */
     public function batchSubscribe(int $idNo, array $custNos): int
     {
-        $savedCustNos = $this->list($idNo);
-        $subscribedCustNos = $this->list($idNo, InterestCompanyRepository::FLAG_LIST_SUBSCRIBED);
+        $savedCustNos = array_column($this->list($idNo), 'custNo');
+        $subscribedCusts = $this->list($idNo, InterestCompanyRepository::FLAG_LIST_SUBSCRIBED);
+        $subscribedCustNos = array_column($subscribedCusts, 'custNo');
 
         $validCustNos = array_filter($custNos, function ($custNo) use ($savedCustNos, $subscribedCustNos) {
             $saved = in_array($custNo, $savedCustNos);
@@ -148,7 +157,8 @@ class SavedCompanyService
      */
     public function batchUnsubscribe(int $idNo, array $custNos): int
     {
-        $subscribedCustNos = $this->list($idNo, InterestCompanyRepository::FLAG_LIST_SUBSCRIBED);
+        $subscribedCusts = $this->list($idNo, InterestCompanyRepository::FLAG_LIST_SUBSCRIBED);
+        $subscribedCustNos = array_column($subscribedCusts, 'custNo');
 
         $validCustNos = array_filter($custNos, function ($custNo) use ($subscribedCustNos) {
             return in_array($custNo, $subscribedCustNos);

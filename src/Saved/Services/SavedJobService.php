@@ -12,7 +12,7 @@ use Illuminate\Contracts\Cache\Repository as Cache;
 
 class SavedJobService
 {
-    public const LIST_CACHE_KEY = 'saved_job_list_0927_';
+    public const LIST_CACHE_KEY = 'saved_job_list_';
     private const LIST_CACHE_TTL = 180;
     private const TOTAL_LIMIT = 200;
 

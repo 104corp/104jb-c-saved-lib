@@ -18,8 +18,11 @@ class SavedCompanyServiceTest extends TestCase
         $idNo = 123;
         $cacheKey = SavedCompanyService::LIST_CACHE_KEY . $idNo;
         $expected = [
-            456456,
-            789789,
+            [
+                'custNo' => 456456,
+                'inputDate' => '2022-09-27 15:05:00',
+                'notify' => 1,
+            ],
         ];
         $mockCache = $this->createMock(Cache::class);
         $mockCache->expects($this->once())
@@ -42,8 +45,11 @@ class SavedCompanyServiceTest extends TestCase
         $idNo = 123;
         $cacheKey = SavedCompanyService::SUBSCRIBED_LIST_CACHE_KEY . $idNo;
         $expected = [
-            456456,
-            789789,
+            [
+                'custNo' => 456456,
+                'inputDate' => '2022-09-27 15:05:00',
+                'notify' => 1,
+            ],
         ];
         $mockCache = $this->createMock(Cache::class);
         $mockCache->expects($this->once())
@@ -66,8 +72,11 @@ class SavedCompanyServiceTest extends TestCase
         $idNo = 123;
         $cacheKey = SavedCompanyService::LIST_CACHE_KEY . $idNo;
         $expected = [
-            456456,
-            789789,
+            [
+                'custNo' => 456456,
+                'inputDate' => '2022-09-27 15:05:00',
+                'notify' => 1,
+            ],
         ];
         $mockCache = $this->createMock(Cache::class);
         $mockCache->expects($this->once())
@@ -82,7 +91,13 @@ class SavedCompanyServiceTest extends TestCase
         $mockRepository->expects($this->once())
             ->method('findByIdNo')
             ->with($idNo, InterestCompanyRepository::FLAG_LIST_ALL)
-            ->willReturn($expected);
+            ->willReturn([
+                [
+                    'custno' => 456456,
+                    'input_date' => '2022-09-27 15:05:00',
+                    'notify' => 1,
+                ],
+            ]);
 
         $target = new SavedCompanyService($mockRepository, $mockCache);
         $actual = $target->list($idNo);
@@ -95,8 +110,11 @@ class SavedCompanyServiceTest extends TestCase
         $idNo = 123;
         $cacheKey = SavedCompanyService::SUBSCRIBED_LIST_CACHE_KEY . $idNo;
         $expected = [
-            456456,
-            789789,
+            [
+                'custNo' => 456456,
+                'inputDate' => '2022-09-27 15:05:00',
+                'notify' => 1,
+            ],
         ];
         $mockCache = $this->createMock(Cache::class);
         $mockCache->expects($this->once())
@@ -111,7 +129,13 @@ class SavedCompanyServiceTest extends TestCase
         $mockRepository->expects($this->once())
             ->method('findByIdNo')
             ->with($idNo, InterestCompanyRepository::FLAG_LIST_SUBSCRIBED)
-            ->willReturn($expected);
+            ->willReturn([
+                [
+                    'custno' => 456456,
+                    'input_date' => '2022-09-27 15:05:00',
+                    'notify' => 1,
+                ],
+            ]);
 
         $target = new SavedCompanyService($mockRepository, $mockCache);
         $actual = $target->list($idNo, InterestCompanyRepository::FLAG_LIST_SUBSCRIBED);
@@ -132,7 +156,11 @@ class SavedCompanyServiceTest extends TestCase
         $mockCache->expects($this->once())
             ->method('get')
             ->with($cacheKey)
-            ->willReturn(range(1, 200));
+            ->willReturn(array_map(function ($custNo) {
+                return [
+                    'custNo' => $custNo
+                ];
+            }, range(1, 200)));
 
         $this->expectException(ExceedLimitException::class);
         $this->expectExceptionMessage(ErrorCode::MSG_SAVE_COMPANY_EXCEED_LIMIT_ERROR);
@@ -155,7 +183,11 @@ class SavedCompanyServiceTest extends TestCase
         $mockCache->expects($this->once())
             ->method('get')
             ->with($cacheKey)
-            ->willReturn([$existedSavedCustNo]);
+            ->willReturn([
+                [
+                    'custNo' => $existedSavedCustNo,
+                ]
+            ]);
 
         $target = new SavedCompanyService($this->createMock(InterestCompanyRepository::class), $mockCache);
         $actual = $target->batchCreate($idNo, [$existedSavedCustNo]);
@@ -193,7 +225,7 @@ class SavedCompanyServiceTest extends TestCase
         $this->assertSame(2, $actual);
     }
 
-    public function testBatchDeleteWithValidcustnosShouldClearCacheAfterDelete()
+    public function testBatchDeleteWithValidCustnosShouldClearCacheAfterDelete()
     {
         $idNo = 123;
         $cacheKey = SavedCompanyService::LIST_CACHE_KEY . $idNo;
@@ -211,7 +243,10 @@ class SavedCompanyServiceTest extends TestCase
         $mockCache->expects($this->once())
             ->method('get')
             ->with($cacheKey)
-            ->willReturn($validCustNos);
+            ->willReturn([
+                ['custNo' => 123,],
+                ['custNo' => 456,],
+            ]);
         $mockCache->expects($this->exactly(2))
             ->method('forget')
             ->withConsecutive([$cacheKey], [$subscribedCacheKey]);
@@ -254,10 +289,6 @@ class SavedCompanyServiceTest extends TestCase
         $idNo = 123;
         $cacheKey = SavedCompanyService::LIST_CACHE_KEY . $idNo;
         $subscribedCacheKey = SavedCompanyService::SUBSCRIBED_LIST_CACHE_KEY . $idNo;
-        $savedCustnos = [
-            456456,
-            789789,
-        ];
         $mockCache = $this->createMock(Cache::class);
         $mockCache->expects($this->exactly(2))
             ->method('has')
@@ -266,7 +297,10 @@ class SavedCompanyServiceTest extends TestCase
         $mockCache->expects($this->exactly(2))
             ->method('get')
             ->withConsecutive([$cacheKey], [$subscribedCacheKey])
-            ->willReturnOnConsecutiveCalls($savedCustnos, []);
+            ->willReturnOnConsecutiveCalls([
+                ['custNo' => 456456,],
+                ['custNo' => 789789,],
+            ], []);
 
         $mockRepository = $this->createMock(InterestCompanyRepository::class);
         $mockRepository->expects($this->once())
@@ -285,13 +319,6 @@ class SavedCompanyServiceTest extends TestCase
         $idNo = 123;
         $cacheKey = SavedCompanyService::LIST_CACHE_KEY . $idNo;
         $subscribedCacheKey = SavedCompanyService::SUBSCRIBED_LIST_CACHE_KEY . $idNo;
-        $savedCustnos = [
-            456456,
-            789789,
-        ];
-        $subscribedCustnos = [
-            456456,
-        ];
         $mockCache = $this->createMock(Cache::class);
         $mockCache->expects($this->exactly(2))
             ->method('has')
@@ -300,7 +327,12 @@ class SavedCompanyServiceTest extends TestCase
         $mockCache->expects($this->exactly(2))
             ->method('get')
             ->withConsecutive([$cacheKey], [$subscribedCacheKey])
-            ->willReturnOnConsecutiveCalls($savedCustnos, $subscribedCustnos);
+            ->willReturnOnConsecutiveCalls([
+                ['custNo' => 456456,],
+                ['custNo' => 789789,],
+            ], [
+                ['custNo' => 456456,]
+            ]);
 
         $target = new SavedCompanyService($this->createMock(InterestCompanyRepository::class), $mockCache);
         $actual = $target->batchSubscribe($idNo, [456456]);
@@ -314,8 +346,8 @@ class SavedCompanyServiceTest extends TestCase
         $cacheKey = SavedCompanyService::LIST_CACHE_KEY . $idNo;
         $subscribedCacheKey = SavedCompanyService::SUBSCRIBED_LIST_CACHE_KEY . $idNo;
         $savedCustnos = [
-            456456,
-            789789,
+            ['custNo' => 456456,],
+            ['custNo' => 789789,],
         ];
 
         $mockCache = $this->createMock(Cache::class);
@@ -339,8 +371,8 @@ class SavedCompanyServiceTest extends TestCase
         $idNo = 123;
         $subscribedCacheKey = SavedCompanyService::SUBSCRIBED_LIST_CACHE_KEY . $idNo;
         $subscribedCustnos = [
-            456456,
-            789789,
+            ['custNo' => 456456,],
+            ['custNo' => 789789,],
         ];
 
         $mockCache = $this->createMock(Cache::class);
@@ -370,8 +402,8 @@ class SavedCompanyServiceTest extends TestCase
         $idNo = 123;
         $subscribedCacheKey = SavedCompanyService::SUBSCRIBED_LIST_CACHE_KEY . $idNo;
         $subscribedCustnos = [
-            456456,
-            789789,
+            ['custNo' => 456456,],
+            ['custNo' => 789789,],
         ];
 
         $mockCache = $this->createMock(Cache::class);

@@ -8,6 +8,7 @@ use Corp104\Jbc\Saved\Exceptions\ErrorCode;
 use Corp104\Jbc\Saved\Exceptions\ExceedLimitException;
 use Corp104\Jbc\Saved\Repositories\NsBuffetRepository;
 use Corp104\Jbc\Saved\Services\SavedJobService;
+use Corp104\Jbc\Search\Job\JobSearch;
 use PHPUnit\Framework\TestCase;
 use Illuminate\Contracts\Cache\Repository as Cache;
 
@@ -18,8 +19,10 @@ class SavedJobServiceTest extends TestCase
         $idNo = 123;
         $cacheKey = SavedJobService::LIST_CACHE_KEY . $idNo;
         $expected = [
-            456456,
-            789789,
+            [
+                'jobNo' => 456456,
+                'inputDate' => '2022-09-27 13:35:00'
+            ],
         ];
         $mockCache = $this->createMock(Cache::class);
         $mockCache->expects($this->once())
@@ -31,7 +34,11 @@ class SavedJobServiceTest extends TestCase
             ->with($cacheKey)
             ->willReturn($expected);
 
-        $target = new SavedJobService($this->createMock(NsBuffetRepository::class), $mockCache);
+        $target = new SavedJobService(
+            $this->createMock(NsBuffetRepository::class),
+            $this->createMock(JobSearch::class),
+            $mockCache,
+        );
         $actual = $target->list($idNo);
 
         $this->assertSame($expected, $actual);
@@ -41,8 +48,12 @@ class SavedJobServiceTest extends TestCase
     {
         $idNo = 123;
         $cacheKey = SavedJobService::LIST_CACHE_KEY . $idNo;
+        $jobNos = [123123];
         $expected = [
-            123123,
+            [
+                'jobNo' => 123123,
+                'inputDate' => '2022-09-27 13:35:00'
+            ],
         ];
         $mockCache = $this->createMock(Cache::class);
         $mockCache->expects($this->once())
@@ -57,9 +68,31 @@ class SavedJobServiceTest extends TestCase
         $mockNsBuffetRepository->expects($this->once())
             ->method('findByIdNo')
             ->with($idNo)
-            ->willReturn($expected);
+            ->willReturn([
+                [
+                    'jobno' => 123123,
+                    'input_date' => '2022-09-27 13:35:00'
+                ],
+            ]);
 
-        $target = new SavedJobService($mockNsBuffetRepository, $mockCache);
+        $mockSearch = $this->createMock(JobSearch::class);
+        $mockSearch->expects($this->once())
+            ->method('onJobs')
+            ->with($jobNos)
+            ->willReturnSelf();
+        $mockSearch->expects($this->once())
+            ->method('offJobs')
+            ->with($jobNos)
+            ->willReturnSelf();
+        $mockSearch->expects($this->exactly(2))
+            ->method('get')
+            ->willReturnOnConsecutiveCalls([['RETURNID' => 123123]], []);
+
+        $target = new SavedJobService(
+            $mockNsBuffetRepository,
+            $mockSearch,
+            $mockCache,
+        );
         $actual = $target->list($idNo);
 
         $this->assertSame($expected, $actual);
@@ -70,6 +103,11 @@ class SavedJobServiceTest extends TestCase
         $idNo = 123;
         $cacheKey = SavedJobService::LIST_CACHE_KEY . $idNo;
 
+        $cachedJobs = array_map(function ($jobNo) {
+            return [
+                'jobNo' => $jobNo,
+            ];
+        }, range(1, 200));
         $mockCache = $this->createMock(Cache::class);
         $mockCache->expects($this->once())
             ->method('has')
@@ -78,12 +116,16 @@ class SavedJobServiceTest extends TestCase
         $mockCache->expects($this->once())
             ->method('get')
             ->with($cacheKey)
-            ->willReturn(range(1, 200));
+            ->willReturn($cachedJobs);
 
         $this->expectException(ExceedLimitException::class);
         $this->expectExceptionMessage(ErrorCode::MSG_SAVE_JOB_EXCEED_LIMIT_ERROR);
 
-        $target = new SavedJobService($this->createMock(NsBuffetRepository::class), $mockCache);
+        $target = new SavedJobService(
+            $this->createMock(NsBuffetRepository::class),
+            $this->createMock(JobSearch::class),
+            $mockCache,
+        );
         $target->batchCreate($idNo, [
             [
                 'jobNo' => 123,
@@ -108,9 +150,15 @@ class SavedJobServiceTest extends TestCase
         $mockNsBuffetRepository->expects($this->once())
             ->method('findByIdNo')
             ->with($idNo)
-            ->willReturn([$existedSavedJobNo]);
+            ->willReturn([
+                ['jobno' => $existedSavedJobNo]
+            ]);
 
-        $target = new SavedJobService($mockNsBuffetRepository, $mockCache);
+        $target = new SavedJobService(
+            $mockNsBuffetRepository,
+            $this->createMock(JobSearch::class),
+            $mockCache,
+        );
         $actual = $target->batchCreate($idNo, [
             [
                 'jobNo' => $existedSavedJobNo,
@@ -147,13 +195,17 @@ class SavedJobServiceTest extends TestCase
             ->with($idNo, $validJobs)
             ->willReturn(1);
 
-        $target = new SavedJobService($mockNsBuffetRepository, $mockCache);
+        $target = new SavedJobService(
+            $mockNsBuffetRepository,
+            $this->createMock(JobSearch::class),
+            $mockCache,
+        );
         $actual = $target->batchCreate($idNo, $validJobs);
 
         $this->assertSame(1, $actual);
     }
 
-    public function testBatchDeleteWithValidJobNosShouldClearCacheAfterDelete()
+    public function testBatchDeleteWithValidJobnosShouldClearCacheAfterDelete()
     {
         $idNo = 123;
         $cacheKey = SavedJobService::LIST_CACHE_KEY . $idNo;
@@ -166,43 +218,16 @@ class SavedJobServiceTest extends TestCase
 
         $mockCache = $this->createMock(Cache::class);
         $mockCache->expects($this->once())
-            ->method('has')
-            ->with($cacheKey)
-            ->willReturn(true);
-        $mockCache->expects($this->once())
-            ->method('get')
-            ->with($cacheKey)
-            ->willReturn([123, 456, 789]);
-        $mockCache->expects($this->once())
             ->method('forget')
             ->with($cacheKey);
 
-        $target = new SavedJobService($mockNsBuffetRepository, $mockCache);
+        $target = new SavedJobService(
+            $mockNsBuffetRepository,
+            $this->createMock(JobSearch::class),
+            $mockCache,
+        );
         $actual = $target->batchDelete($idNo, [123, 456, 789]);
 
         $this->assertSame(3, $actual);
-    }
-
-    public function testBatchDeleteWithInvalidJobNosShouldReturnZero()
-    {
-        $idNo = 123;
-        $cacheKey = SavedJobService::LIST_CACHE_KEY . $idNo;
-
-        $mockNsBuffetRepository = $this->createMock(NsBuffetRepository::class);
-
-        $mockCache = $this->createMock(Cache::class);
-        $mockCache->expects($this->once())
-            ->method('has')
-            ->with($cacheKey)
-            ->willReturn(true);
-        $mockCache->expects($this->once())
-            ->method('get')
-            ->with($cacheKey)
-            ->willReturn([321, 654, 987]);
-
-        $target = new SavedJobService($mockNsBuffetRepository, $mockCache);
-        $actual = $target->batchDelete($idNo, [123, 456, 789]);
-
-        $this->assertSame(0, $actual);
     }
 }

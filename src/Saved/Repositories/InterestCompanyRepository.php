@@ -30,7 +30,8 @@ class InterestCompanyRepository
         }
 
         return $model->orderByDesc('input_date')
-            ->pluck('custno')
+            ->select('custno', 'input_date', 'notify')
+            ->get()
             ->toArray();
     }
 

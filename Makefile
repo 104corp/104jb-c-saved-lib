@@ -16,6 +16,9 @@ deps:
 tests: phpcs phpstan
 	vendor/bin/phpunit --testdox tests
 
+tests.single:
+	vendor/bin/phpunit --testdox --filter $(fun)
+
 phpcs:
 	vendor/bin/phpcs
 

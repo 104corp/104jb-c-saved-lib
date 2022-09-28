@@ -79,11 +79,11 @@ class SavedJobServiceTest extends TestCase
         $mockSearch->expects($this->once())
             ->method('onJobs')
             ->with($jobNos)
-            ->willReturn($mockSearch);
+            ->willReturnSelf();
         $mockSearch->expects($this->once())
             ->method('offJobs')
             ->with($jobNos)
-            ->willReturn($mockSearch);
+            ->willReturnSelf();
         $mockSearch->expects($this->exactly(2))
             ->method('get')
             ->willReturnOnConsecutiveCalls([['RETURNID' => 123123]], []);

@@ -144,6 +144,6 @@ class SavedJobService
         $offJobs = $this->jobSearch->offJobs($jobNos, ['returnid'])->get();
         $offJobNos = array_column($offJobs, 'returnid');
 
-        return $onJobNos + $offJobNos;
+        return array_merge($onJobNos, $offJobNos);
     }
 }

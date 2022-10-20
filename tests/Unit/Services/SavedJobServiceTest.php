@@ -184,7 +184,11 @@ class SavedJobServiceTest extends TestCase
         $mockCache->expects($this->once())
             ->method('has')
             ->with($cacheKey)
-            ->willReturn(false);
+            ->willReturn(true);
+        $mockCache->expects($this->once())
+            ->method('get')
+            ->with($cacheKey)
+            ->willReturn([456456]);
         $mockCache->expects($this->once())
             ->method('forget')
             ->with($cacheKey);
@@ -195,9 +199,22 @@ class SavedJobServiceTest extends TestCase
             ->with($idNo, $validJobs)
             ->willReturn(1);
 
+        $mockSearch = $this->createMock(JobSearch::class);
+        $mockSearch->expects($this->once())
+            ->method('onJobs')
+            ->with([123123])
+            ->willReturnSelf();
+        $mockSearch->expects($this->once())
+            ->method('offJobs')
+            ->with([123123])
+            ->willReturnSelf();
+        $mockSearch->expects($this->exactly(2))
+            ->method('get')
+            ->willReturnOnConsecutiveCalls([['RETURNID' => 123123]], []);
+
         $target = new SavedJobService(
             $mockNsBuffetRepository,
-            $this->createMock(JobSearch::class),
+            $mockSearch,
             $mockCache,
         );
         $actual = $target->batchCreate($idNo, $validJobs);

@@ -89,14 +89,19 @@ class SavedJobService
             );
         }
 
-        $validJobs = array_filter($jobs, function ($job) use ($savedJobNos) {
-            return !in_array($job['jobNo'], $savedJobNos);
+        $inputJobNos = array_column($jobs, 'jobNo');
+        $validJobNos = $this->validJobFilter($inputJobNos);
+        $inputJobs = array_filter($jobs, function ($job) use ($savedJobNos, $validJobNos) {
+            $duplicated = in_array($job['jobNo'], $savedJobNos);
+            $existed = in_array($job['jobNo'], $validJobNos);
+
+            return $existed & !$duplicated;
         });
-        if (empty($validJobs)) {
+        if (empty($inputJobs)) {
             return 0;
         }
 
-        $recordCount = $this->nsBuffetRepository->insertMany($idNo, $validJobs);
+        $recordCount = $this->nsBuffetRepository->insertMany($idNo, $inputJobs);
         $this->cache->forget($this->getListCacheKey($idNo));
 
         return $recordCount;

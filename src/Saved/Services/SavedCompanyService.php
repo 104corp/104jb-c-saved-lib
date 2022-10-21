@@ -142,7 +142,11 @@ class SavedCompanyService
 
         $recordCount = $this->interestCompanyRepository
             ->updateNotify($idNo, $validCustNos, InterestCompanyRepository::ACTION_SUBSCRIBE);
-        $this->cache->forget($this->getListCacheKey($idNo, InterestCompanyRepository::FLAG_LIST_SUBSCRIBED));
+        if ($recordCount > 0) {
+            $this->cache->forget($this->getListCacheKey($idNo));
+            $this->cache->forget($this->getListCacheKey($idNo, InterestCompanyRepository::FLAG_LIST_SUBSCRIBED));
+        }
+
 
         return $recordCount;
     }
@@ -169,7 +173,10 @@ class SavedCompanyService
 
         $recordCount = $this->interestCompanyRepository
             ->updateNotify($idNo, $validCustNos, InterestCompanyRepository::ACTION_UNSUBSCRIBE);
-        $this->cache->forget($this->getListCacheKey($idNo, InterestCompanyRepository::FLAG_LIST_SUBSCRIBED));
+        if ($recordCount > 0) {
+            $this->cache->forget($this->getListCacheKey($idNo));
+            $this->cache->forget($this->getListCacheKey($idNo, InterestCompanyRepository::FLAG_LIST_SUBSCRIBED));
+        }
 
         return $recordCount;
     }
